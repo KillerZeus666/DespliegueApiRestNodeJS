@@ -1,0 +1,9 @@
+postgresql://
+
+patrones_yb3x_user
+:
+QNZkT7dkRVCdyva6hqKaJhkA8qkCCiFl
+@
+dpg-cuha7fbqf0us739c3r40-a.oregon-postgres.render.com
+/
+patrones_yb3x

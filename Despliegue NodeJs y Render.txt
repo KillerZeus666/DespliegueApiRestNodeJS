@@ -1,0 +1,91 @@
+Despliegue de Nodejs en Render.com (con PostgreSQL)
+https://www.youtube.com/watch?v=-KEJ8_yvy0Q&t=10s
+------------------------------------------------
+https://render.com/
+
+
+CREATE TABLE usuarios (
+Id SERIAL PRIMARY KEY,
+nombre VARCHAR(30),
+edad VARCHAR(6),
+tipo VARCHAR(30)
+);
+
+
+INSERT INTO usuarios (nombre,edad,tipo) VALUES ('James Rodrigeuz','27','Delantero');
+
+---------------------------------------------
+------------------index.js ------------------
+---------------------------------------------
+const express = require("express");
+const app = express();
+const bodyParser = require('body-parser');
+const { connectionString } = require("pg/lib/defaults");
+require('dotenv').config()
+const Pool = require('pg').Pool
+//const connectionString = process.env.DB
+
+app.use(bodyParser.json())
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+)
+
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL    
+  })
+
+   const getUsuario = (request, response) => {
+    pool.query('SELECT * FROM usuarios ORDER BY id ASC', (error, results) => {
+      if (error) {
+        throw error
+      }
+      response.status(200).json(results.rows)
+    })
+  }
+
+  const crearUsuario = (request, response) => {
+    const { nombre,edad,tipo } = request.body
+    
+    console.log("Nombre:", nombre, "edad:", edad, "tipo:", tipo)
+    pool.query('insert into usuarios (nombre,edad,tipo) values ($1, $2, $3)', [nombre,edad,tipo], (error, results) => {
+      if (error) {
+        throw error
+      }
+      response.status(201).json({ UsuarioAgregado: 'Ok' })
+    })
+  }
+
+  app.get('/', function (req, res) {
+    res.json({ Resultado: 'Bienvenido al Taller Despliegue NodeJs y Postgres - Render' })
+  });
+
+  app.get('/usuarios', getUsuario)
+  app.post('/usuarios', crearUsuario)
+  
+const port = process.env.PORT || 1337;
+
+app.listen(port, () => {
+ console.log("El servidor está inicializado en http://localhost:%d", port);
+});
+
+
+postgresql://bdsspd_user:iB75BioCB7vivaBfuWXjLquhNPi8nO7b@dpg-cuba9hi3esus73ersav0-a.oregon-postgres.render.com/bdsspd
+
+----------------------------
+-----------.env-------------
+----------------------------
+DATABASE_URL = postgresql://bdsspd_user:iB75BioCB7vivaBfuWXjLquhNPi8nO7b@dpg-cuba9hi3esus73ersav0-a/bdsspd
+
+----Conexión Local
+DATABASE_URL=postgresql://postgres:123456@localhost:5432/BDPRUEBA
+
+----------------------------
+-------.gitignore-----------
+----------------------------
+# Ignora la carpeta node_modules
+node_modules
+
+# Ignora los archivos relacionados a API keys
+.env
